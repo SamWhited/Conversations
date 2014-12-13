@@ -38,6 +38,7 @@ import java.util.Map.Entry;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
@@ -208,7 +209,7 @@ public class XmppConnection implements Runnable {
 			Tag nextTag;
 			while ((nextTag = tagReader.readTag()) != null) {
 				if (nextTag.isStart("stream")) {
-					processStream(nextTag);
+					processStream(nextTag, null);
 					break;
 				} else {
 					throw new IOException("unknown tag on connect");
@@ -260,7 +261,7 @@ public class XmppConnection implements Runnable {
 		connect();
 	}
 
-	private void processStream(final Tag currentTag) throws XmlPullParserException,
+	private void processStream(final Tag currentTag, final SSLSession sslSession) throws XmlPullParserException,
 					IOException, NoSuchAlgorithmException {
 						Tag nextTag = tagReader.readTag();
 
@@ -268,7 +269,7 @@ public class XmppConnection implements Runnable {
 							if (nextTag.isStart("error")) {
 								processStreamError(nextTag);
 							} else if (nextTag.isStart("features")) {
-								processStreamFeatures(nextTag);
+								processStreamFeatures(nextTag, sslSession);
 							} else if (nextTag.isStart("proceed")) {
 								switchOverToTls(nextTag);
 							} else if (nextTag.isStart("success")) {
@@ -284,7 +285,7 @@ public class XmppConnection implements Runnable {
 										String.valueOf(saslMechanism.getPriority()));
 								tagReader.reset();
 								sendStartStream();
-								processStream(tagReader.readTag());
+								processStream(tagReader.readTag(), sslSession);
 								break;
 							} else if (nextTag.isStart("failure")) {
 								throw new UnauthorizedException();
@@ -554,7 +555,7 @@ public class XmppConnection implements Runnable {
 			sendStartStream();
 			Log.d(Config.LOGTAG, account.getJid().toBareJid()+ ": TLS connection established");
 			features.encryptionEnabled = true;
-			processStream(tagReader.readTag());
+			processStream(tagReader.readTag(), sslSocket.getSession());
 			sslSocket.close();
 		} catch (final NoSuchAlgorithmException | KeyManagementException e1) {
 			Log.d(Config.LOGTAG,account.getJid().toBareJid()+": TLS certificate verification failed");
@@ -562,7 +563,7 @@ public class XmppConnection implements Runnable {
 		}
 	}
 
-	private void processStreamFeatures(final Tag currentTag)
+	private void processStreamFeatures(final Tag currentTag, final SSLSession sslSession)
 		throws XmlPullParserException, IOException {
 		this.streamFeatures = tagReader.readElement(currentTag);
 		if (this.streamFeatures.hasChild("starttls") && !features.encryptionEnabled) {
@@ -581,8 +582,10 @@ public class XmppConnection implements Runnable {
 					.findChild("mechanisms"));
 			final Element auth = new Element("auth");
 			auth.setAttribute("xmlns", "urn:ietf:params:xml:ns:xmpp-sasl");
-			if (mechanisms.contains("SCRAM-SHA-1")) {
-				saslMechanism = new ScramSha1(tagWriter, account, mXmppConnectionService.getRNG());
+			if (mechanisms.contains("SCRAM-SHA-1-PLUS")) {
+				saslMechanism = new ScramSha1(tagWriter, account, mXmppConnectionService.getRNG(), sslSession);
+			} else if (mechanisms.contains("SCRAM-SHA-1")) {
+				saslMechanism = new ScramSha1(tagWriter, account, mXmppConnectionService.getRNG(), null);
 			} else if (mechanisms.contains("PLAIN")) {
 				saslMechanism = new Plain(tagWriter, account);
 			} else if (mechanisms.contains("DIGEST-MD5")) {

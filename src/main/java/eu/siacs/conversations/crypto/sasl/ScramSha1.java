@@ -11,21 +11,27 @@ import org.bouncycastle.crypto.params.KeyParameter;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSession;
 
 import eu.siacs.conversations.entities.Account;
 import eu.siacs.conversations.utils.CryptoHelper;
 import eu.siacs.conversations.xml.TagWriter;
 
 public class ScramSha1 extends SaslMechanism {
-	// TODO: When channel binding (SCRAM-SHA1-PLUS) is supported in future, generalize this to indicate support and/or usage.
-	final private static String GS2_HEADER = "n,,";
+	final private String GS2_HEADER;
 	private String clientFirstMessageBare;
-	private byte[] serverFirstMessage;
 	final private String clientNonce;
+	final private SSLSession sslSession;
 	private byte[] serverSignature = null;
-	private static HMac HMAC;
-	private static Digest DIGEST;
+	private static final HMac HMAC;
+	private static final Digest DIGEST;
 	private static final byte[] CLIENT_KEY_BYTES = "Client Key".getBytes();
 	private static final byte[] SERVER_KEY_BYTES = "Server Key".getBytes();
 
@@ -67,22 +73,37 @@ public class ScramSha1 extends SaslMechanism {
 
 	private State state = State.INITIAL;
 
-	public ScramSha1(final TagWriter tagWriter, final Account account, final SecureRandom rng) {
+	public ScramSha1(final TagWriter tagWriter, final Account account, final SecureRandom rng, final SSLSession sslSession) {
 		super(tagWriter, account, rng);
 
 		// This nonce should be different for each authentication attempt.
 		clientNonce = new BigInteger(100, this.rng).toString(32);
 		clientFirstMessageBare = "";
+		if (sslSession != null) {
+			this.sslSession = sslSession;
+			GS2_HEADER = "p=tls-server-end-point,,";
+		} else {
+			this.sslSession = null;
+			GS2_HEADER = "y,,";
+		}
 	}
 
 	@Override
 	public int getPriority() {
-		return 20;
+		if (this.sslSession != null) {
+			return 25;
+		} else {
+			return 20;
+		}
 	}
 
 	@Override
 	public String getMechanism() {
-		return "SCRAM-SHA-1";
+		if (this.sslSession != null) {
+			return "SCRAM-SHA-1-PLUS";
+		} else {
+			return "SCRAM-SHA-1";
+		}
 	}
 
 	@Override
@@ -104,7 +125,7 @@ public class ScramSha1 extends SaslMechanism {
 				if (challenge == null) {
 					throw new AuthenticationException("challenge can not be null");
 				}
-				serverFirstMessage = Base64.decode(challenge, Base64.DEFAULT);
+				final byte[] serverFirstMessage = Base64.decode(challenge, Base64.DEFAULT);
 				final Tokenizer tokenizer = new Tokenizer(serverFirstMessage);
 				String nonce = "";
 				int iterationCount = -1;
@@ -148,8 +169,42 @@ public class ScramSha1 extends SaslMechanism {
 					throw new AuthenticationException("Server sent empty salt");
 				}
 
-				final String clientFinalMessageWithoutProof = "c=" + Base64.encodeToString(
-						GS2_HEADER.getBytes(), Base64.NO_WRAP) + ",r=" + nonce;
+				byte[] cbindData = {};
+				if (sslSession != null) {
+					try {
+						final String usealgo;
+						final Certificate cert = sslSession.getPeerCertificates()[0];
+						final String algo = cert.getPublicKey().getAlgorithm();
+						// RFC5929 §4.1
+						// if the certificate's signatureAlgorithm uses a single hash
+						// function, and that hash function is either MD5 [RFC1321] or SHA-1
+						// [RFC3174], then use SHA-256 [FIPS-180-3];
+						if (algo.equals("MD5") || algo.equals("SHA-1")) {
+							usealgo = "SHA-256";
+						} else {
+							// RFC5929 §4.1
+							// if the certificate's signatureAlgorithm uses a single hash
+							// function and that hash function neither MD5 nor SHA-1, then use
+							// the hash function associated with the certificate's
+							// signatureAlgorithm;
+							usealgo = algo;
+						}
+						final MessageDigest md = MessageDigest.getInstance(usealgo);
+						final byte[] der = cert.getEncoded();
+						md.update(der);
+						cbindData = md.digest();
+					} catch (final SSLPeerUnverifiedException | CertificateEncodingException | NoSuchAlgorithmException ignored) {
+						// Can not get channel binding data. Server will fail on next step.
+					}
+				}
+
+				final int gs2Len = GS2_HEADER.getBytes().length;
+				final byte[] cMessage = new byte[gs2Len + cbindData.length];
+				System.arraycopy(GS2_HEADER.getBytes(), 0, cMessage, 0, gs2Len);
+				System.arraycopy(cbindData, 0, cMessage, gs2Len, cbindData.length);
+
+				final String clientFinalMessageWithoutProof = "c=" + Base64.encodeToString(cMessage, Base64.NO_WRAP)
+					+ ",r=" + nonce;
 				final byte[] authMessage = (clientFirstMessageBare + ',' + new String(serverFirstMessage) + ','
 						+ clientFinalMessageWithoutProof).getBytes();
 
@@ -164,15 +219,10 @@ public class ScramSha1 extends SaslMechanism {
 					throw new AuthenticationException("Invalid keys generated");
 				}
 				final byte[] clientSignature;
-				try {
-					serverSignature = hmac(keys.serverKey, authMessage);
-					final byte[] storedKey = digest(keys.clientKey);
+				serverSignature = hmac(keys.serverKey, authMessage);
+				final byte[] storedKey = digest(keys.clientKey);
 
-					clientSignature = hmac(storedKey, authMessage);
-
-				} catch (final InvalidKeyException e) {
-					throw new AuthenticationException(e);
-				}
+				clientSignature = hmac(storedKey, authMessage);
 
 				final byte[] clientProof = new byte[keys.clientKey.length];
 
@@ -198,8 +248,7 @@ public class ScramSha1 extends SaslMechanism {
 		}
 	}
 
-	public static synchronized byte[] hmac(final byte[] key, final byte[] input)
-		throws InvalidKeyException {
+	public static synchronized byte[] hmac(final byte[] key, final byte[] input) {
 		HMAC.init(new KeyParameter(key));
 		HMAC.update(input, 0, input.length);
 		final byte[] out = new byte[HMAC.getMacSize()];
