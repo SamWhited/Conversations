@@ -3,14 +3,37 @@ package eu.siacs.conversations.xmpp.jid;
 import net.java.otr4j.session.SessionID;
 
 import java.net.IDN;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import gnu.inet.encoding.Stringprep;
 import gnu.inet.encoding.StringprepException;
 
 /**
- * The `Jid' class provides an immutable representation of a JID.
+ * The `Jid' class provides an immutable representation of a JID as specified in RFC 6122 with support for escaping of
+ * disallowed characters in the localpart as specified in XEP-0106.
  */
 public final class Jid {
+
+	private static final Map<String, String> nodeEscape;
+
+	static {
+		// See XEP-0106 Version 1.1 § 3.2 Table 1
+		nodeEscape = Collections.unmodifiableMap(new HashMap<String, String>() {{
+			put(" ",  "\\20");
+			put("\"", "\\22");
+			put("&",  "\\26");
+			put("'",  "\\27");
+			put("/",  "\\2f");
+			put(":",  "\\3a");
+			put("<",  "\\3c");
+			put(">",  "\\3e");
+			put("@",  "\\40");
+			// Special case; See XEP-0106 § 4.3 Exceptions
+			put("\\5c", "\\5c5c");
+		}});
+	}
 
 	private final String localpart;
 	private final String domainpart;
@@ -18,7 +41,7 @@ public final class Jid {
 
 	// It's much more efficient to store the ful JID as well as the parts instead of figuring them
 	// all out every time (since some characters are displayed but aren't used for comparisons).
-	private final String displayjid;
+	private final String displayJid;
 
 	public String getLocalpart() {
 		return localpart;
@@ -88,7 +111,12 @@ public final class Jid {
 		} else {
 			final String lp = jid.substring(0, atLoc);
 			try {
-				localpart = Stringprep.nodeprep(lp);
+				localpart = Stringprep.nodeprep(nodeEscape(lp));
+				// From XEP-0106 § 3.2 Escaping Transformations and § 4.1 Native Processing:
+				// The character sequence \20 MUST NOT be the first or last character of an escaped node identifier.
+				if (localpart.startsWith("\\20") || localpart.endsWith("\\20")) {
+					throw new InvalidJidException("Escaped JID MUST NOT begin or end with \\20");
+				}
 			} catch (final StringprepException e) {
 				throw new InvalidJidException(InvalidJidException.STRINGPREP_FAIL, e);
 			}
@@ -139,7 +167,7 @@ public final class Jid {
 			throw new InvalidJidException(InvalidJidException.INVALID_PART_LENGTH);
 		}
 
-		this.displayjid = finaljid;
+		this.displayJid = finaljid;
 	}
 
 	public Jid toBareJid() {
@@ -162,7 +190,7 @@ public final class Jid {
 
 	@Override
 	public String toString() {
-		return displayjid;
+		return displayJid;
 	}
 
 	@Override
@@ -193,5 +221,14 @@ public final class Jid {
 
 	public boolean isDomainJid() {
 		return !this.hasLocalpart();
+	}
+
+	private static String nodeEscape(final String localpart) {
+		// TODO: There is probably a more efficient way to do this. StringBuilder and a pre-compiled static Matcher?
+		String escaped = localpart;
+		for (final Map.Entry<String, String> entry : nodeEscape.entrySet()) {
+			escaped = escaped.replaceAll(entry.getKey(), entry.getValue());
+		}
+		return escaped;
 	}
 }
