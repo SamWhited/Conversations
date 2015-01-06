@@ -129,12 +129,21 @@
 			        android:title="@string/pref_enter_is_send"
 			        android:summary="@string/pref_enter_is_send_summary" />
 	        </PreferenceCategory>
-            <PreferenceCategory android:title="@string/pref_expert_options_other" >
+            <PreferenceCategory android:title="@string/pref_expert_options_proxy">
+                <ListPreference
+                    android:defaultValue="never"
+                    android:entries="@array/proxy_usage"
+                    android:entryValues="@array/proxy_usage_values"
+                    android:key="proxy_usage"
+                    android:summary="@string/pref_proxy_usage_summary"
+                    android:title="@string/pref_proxy_usage" />
                 <eu.siacs.conversations.ui.SummaryEditTextPreference
                     android:key="proxy"
                     android:hint="@string/pref_proxy_hint"
                     android:summary="@string/pref_proxy_summary"
                     android:title="@string/pref_proxy_title" />
+            </PreferenceCategory>
+            <PreferenceCategory android:title="@string/pref_expert_options_other" >
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="indicate_received"

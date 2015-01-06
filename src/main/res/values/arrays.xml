@@ -8,6 +8,16 @@
 		<item>Conversations</item>
 		<item>Android</item>
 	</string-array>
+    <string-array name="proxy_usage">
+        <item>Never</item>
+        <item>Only .onion</item>
+        <item>Always</item>
+    </string-array>
+    <string-array name="proxy_usage_values">
+        <item>never</item>
+        <item>onion</item>
+        <item>always</item>
+    </string-array>
 	<string-array name="filesizes">
 		<item>@string/never</item>
 		<item>256 KiB</item>

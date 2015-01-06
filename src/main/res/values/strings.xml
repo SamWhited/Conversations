@@ -104,6 +104,8 @@
     <string name="pref_general">General</string>
     <string name="pref_xmpp_resource">XMPP resource</string>
     <string name="pref_xmpp_resource_summary">The name this client identifies itself with</string>
+    <string name="pref_proxy_usage_summary">Determines when the proxy should be used</string>
+    <string name="pref_proxy_usage">Use Proxy</string>
     <string name="pref_accept_files">Accept files</string>
     <string name="pref_accept_files_summary">Automatically accept files smaller than…</string>
     <string name="pref_notification_settings">Notification Settings</string>
@@ -318,6 +320,7 @@
     <string name="pref_proxy_title">Proxy</string>
     <string name="pref_use_send_button_to_indicate_status_summary">Colorize send button to indicate contact status</string>
     <string name="pref_expert_options_other">Other</string>
+    <string name="pref_expert_options_proxy">Proxy</string>
     <string name="pref_conference_name">Conference name</string>
     <string name="pref_conference_name_summary">Use room’s subject instead of JID to identify conferences</string>
     <string name="toast_message_otr_fingerprint">OTR fingerprint copied to clipboard!</string>
