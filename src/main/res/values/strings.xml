@@ -313,6 +313,9 @@
     <string name="pref_use_send_button_to_indicate_status">Send button indicates status</string>
     <string name="pref_use_indicate_received">Request message receipts</string>
     <string name="pref_use_indicate_received_summary">Received messages will be marked with a green tick if supported</string>
+    <string name="pref_proxy_hint" translatable="false">127.0.0.1:9050</string>
+    <string name="pref_proxy_summary">A SOCKS5 proxy to use for all connections on enabled accounts</string>
+    <string name="pref_proxy_title">Proxy</string>
     <string name="pref_use_send_button_to_indicate_status_summary">Colorize send button to indicate contact status</string>
     <string name="pref_expert_options_other">Other</string>
     <string name="pref_conference_name">Conference name</string>
