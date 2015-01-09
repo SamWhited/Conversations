@@ -25,6 +25,7 @@ import java.net.ConnectException;
 import java.net.IDN;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
@@ -154,6 +155,7 @@ public class XmppConnection implements Runnable {
 			tagWriter = new TagWriter();
 			packetCallbacks.clear();
 			this.changeStatus(Account.State.CONNECTING);
+			// TODO: Use proxy for SRV lookups.
 			final Bundle result = DNSHelper.getSRVRecord(account.getServer());
 			final ArrayList<Parcelable> values = result.getParcelableArrayList("values");
 			if ("timeout".equals(result.getString("error"))) {
@@ -185,7 +187,11 @@ public class XmppConnection implements Runnable {
 									+ ": using values from dns "
 									+ srvRecordServer + ":" + srvRecordPort);
 						}
-						socket = new Socket();
+						if (usingProxy()) {
+							socket = new Socket(getProxy());
+						} else {
+							socket = new Socket();
+						}
 						socket.connect(addr, 20000);
 						socketError = false;
 					} catch (final UnknownHostException e) {
@@ -201,7 +207,12 @@ public class XmppConnection implements Runnable {
 				}
 			} else if (result.containsKey("error")
 					&& "nosrv".equals(result.getString("error", null))) {
-				socket = new Socket(account.getServer().getDomainpart(), 5222);
+				if (usingProxy()) {
+					socket = new Socket(getProxy());
+				} else {
+					socket = new Socket();
+				}
+				socket.connect(new InetSocketAddress(account.getServer().getDomainpart(), 5222));
 			} else {
 				throw new IOException("timeout in dns");
 			}
@@ -482,6 +493,28 @@ public class XmppConnection implements Runnable {
 		return PreferenceManager.getDefaultSharedPreferences(applicationContext);
 	}
 
+	private boolean usingProxy() {
+		final String usage = getPreferences().getString("proxy_usage", "onion");
+		return usage.equals("always") || (usage.equals("onion") && account.isOnion());
+	}
+
+	private Proxy getProxy() {
+		final String[] proxyParts = getPreferences().getString("proxy", "127.0.0.1:9050").split(":", 1);
+		final InetSocketAddress address;
+		int port;
+		if (proxyParts.length == 2) {
+			try {
+				port = Integer.valueOf(proxyParts[1]);
+			} catch (final NumberFormatException e) {
+				port = 9050;
+			}
+			address = new InetSocketAddress(proxyParts[0], port);
+		} else {
+			address = new InetSocketAddress(proxyParts[0], 9050);
+		}
+		return new Proxy(Proxy.Type.SOCKS, address);
+	}
+
 	private boolean enableLegacySSL() {
 		return getPreferences().getBoolean("enable_legacy_ssl", false);
 	}
@@ -499,7 +532,7 @@ public class XmppConnection implements Runnable {
 				throw new IOException("could not setup ssl");
 			}
 
-			final SSLSocket sslSocket = (SSLSocket) factory.createSocket(socket,address.getHostAddress(), socket.getPort(),true);
+			final SSLSocket sslSocket = (SSLSocket) factory.createSocket(socket, address.getHostAddress(), socket.getPort(), true);
 
 			if (sslSocket == null) {
 				throw new IOException("could not initialize ssl socket");

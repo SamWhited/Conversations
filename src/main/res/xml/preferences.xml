@@ -131,7 +131,7 @@
 	        </PreferenceCategory>
             <PreferenceCategory android:title="@string/pref_expert_options_proxy">
                 <ListPreference
-                    android:defaultValue="never"
+                    android:defaultValue="onion"
                     android:entries="@array/proxy_usage"
                     android:entryValues="@array/proxy_usage_values"
                     android:key="proxy_usage"

@@ -1,17 +1,7 @@
 package eu.siacs.conversations.utils;
 
-import de.measite.minidns.Client;
-import de.measite.minidns.DNSMessage;
-import de.measite.minidns.Record;
-import de.measite.minidns.Record.TYPE;
-import de.measite.minidns.Record.CLASS;
-import de.measite.minidns.record.SRV;
-import de.measite.minidns.record.A;
-import de.measite.minidns.record.AAAA;
-import de.measite.minidns.record.Data;
-import de.measite.minidns.util.NameUtil;
-import eu.siacs.conversations.Config;
-import eu.siacs.conversations.xmpp.jid.Jid;
+import android.os.Bundle;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,14 +11,24 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.TreeMap;
 
-import android.os.Bundle;
-import android.util.Log;
+import de.measite.minidns.Client;
+import de.measite.minidns.DNSMessage;
+import de.measite.minidns.Record;
+import de.measite.minidns.Record.CLASS;
+import de.measite.minidns.Record.TYPE;
+import de.measite.minidns.record.A;
+import de.measite.minidns.record.AAAA;
+import de.measite.minidns.record.Data;
+import de.measite.minidns.record.SRV;
+import de.measite.minidns.util.NameUtil;
+import eu.siacs.conversations.Config;
+import eu.siacs.conversations.xmpp.jid.Jid;
 
-public class DNSHelper {
-	protected static Client client = new Client();
+public final class DNSHelper {
+	private static final Client client = new Client();
 
 	public static Bundle getSRVRecord(final Jid jid) throws IOException {
-        final String host = jid.getDomainpart();
+		final String host = jid.getDomainpart();
 		String dns[] = client.findDNS();
 
 		if (dns != null) {
@@ -40,7 +40,7 @@ public class DNSHelper {
 				} else if (b.containsKey("error")
 						&& "nosrv".equals(b.getString("error", null))) {
 					return b;
-				}
+						}
 			}
 		}
 		return queryDNS(host, InetAddress.getByName("8.8.8.8"));
@@ -52,7 +52,7 @@ public class DNSHelper {
 			String qname = "_xmpp-client._tcp." + host;
 			Log.d(Config.LOGTAG,
 					"using dns server: " + dnsServer.getHostAddress()
-							+ " to look up " + host);
+					+ " to look up " + host);
 			DNSMessage message = client.query(qname, TYPE.SRV, CLASS.IN,
 					dnsServer.getHostAddress());
 
@@ -69,7 +69,7 @@ public class DNSHelper {
 			TreeMap<String, ArrayList<String>> ips6 = new TreeMap<>();
 
 			for (Record[] rrset : new Record[][] { message.getAnswers(),
-					message.getAdditionalResourceRecords() }) {
+				message.getAdditionalResourceRecords() }) {
 				for (Record rr : rrset) {
 					Data d = rr.getPayload();
 					if (d instanceof SRV
@@ -80,7 +80,7 @@ public class DNSHelper {
 									new ArrayList<SRV>(2));
 						}
 						priorities.get(srv.getPriority()).add(srv);
-					}
+							}
 					if (d instanceof A) {
 						A arecord = (A) d;
 						if (!ips4.containsKey(rr.getName())) {
@@ -116,7 +116,7 @@ public class DNSHelper {
 
 				while (totalweight > 0l && s.size() > 0) {
 					long p = (rnd.nextLong() & 0x7fffffffffffffffl)
-							% totalweight;
+						% totalweight;
 					int i = 0;
 					while (p > 0) {
 						p -= s.get(i++).getPriority();
@@ -174,7 +174,7 @@ public class DNSHelper {
 		return namePort;
 	}
 
-	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
 	public static String bytesToHex(byte[] bytes) {
 		char[] hexChars = new char[bytes.length * 2];

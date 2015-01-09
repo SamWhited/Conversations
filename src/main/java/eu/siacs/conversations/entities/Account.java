@@ -193,6 +193,10 @@ public class Account extends AbstractEntity {
 		return jid.toDomainJid();
 	}
 
+	public boolean isOnion() {
+		return getServer().toString().endsWith(".onion");
+	}
+
 	public void setServer(final String server) throws InvalidJidException {
 		jid = Jid.fromParts(jid.getLocalpart(), server, jid.getResourcepart());
 	}
