@@ -160,7 +160,7 @@ public class XmppConnection implements Runnable {
 			final ArrayList<Parcelable> values = result.getParcelableArrayList("values");
 			if ("timeout".equals(result.getString("error"))) {
 				throw new IOException("timeout in dns");
-			} else if (values != null) {
+			} else if (values != null && !account.isOnion()) {
 				int i = 0;
 				boolean socketError = true;
 				while (socketError && values.size() > i) {
@@ -205,8 +205,8 @@ public class XmppConnection implements Runnable {
 				if (socketError) {
 					throw new UnknownHostException();
 				}
-			} else if (result.containsKey("error")
-					&& "nosrv".equals(result.getString("error", null))) {
+			} else if (account.isOnion() || (result.containsKey("error")
+						&& "nosrv".equals(result.getString("error", null)))) {
 				if (usingProxy()) {
 					socket = new Socket(getProxy());
 				} else {
