@@ -1,10 +1,12 @@
-package eu.siacs.conversations.ui;
+package eu.siacs.conversations.ui.preferences;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.preference.Preference;
 import android.util.AttributeSet;
+
+import eu.siacs.conversations.ui.AboutActivity;
 
 public class AboutPreference extends Preference {
 	public AboutPreference(final Context context, final AttributeSet attrs, final int defStyle) {
@@ -17,14 +19,14 @@ public class AboutPreference extends Preference {
 		setSummary();
 	}
 
-    @Override
-    protected void onClick() {
-        super.onClick();
-        final Intent intent = new Intent(getContext(), AboutActivity.class);
-        getContext().startActivity(intent);
-    }
+	@Override
+	protected void onClick() {
+		super.onClick();
+		final Intent intent = new Intent(getContext(), AboutActivity.class);
+		getContext().startActivity(intent);
+	}
 
-    private void setSummary() {
+	private void setSummary() {
 		if (getContext() != null && getContext().getPackageManager() != null) {
 			final String packageName = getContext().getPackageName();
 			final String versionName;

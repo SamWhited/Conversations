@@ -39,7 +39,7 @@ import eu.siacs.conversations.entities.Conversation;
 import eu.siacs.conversations.entities.Message;
 import eu.siacs.conversations.ui.ConversationActivity;
 import eu.siacs.conversations.ui.ManageAccountActivity;
-import eu.siacs.conversations.ui.TimePreference;
+import eu.siacs.conversations.ui.preferences.TimePreference;
 import eu.siacs.conversations.utils.UIHelper;
 
 public class NotificationService {

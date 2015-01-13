@@ -44,13 +44,13 @@
               android:key="enable_quiet_hours"
               android:summary="@string/pref_quiet_hours_summary"
               android:title="@string/title_pref_enable_quiet_hours" />
-            <eu.siacs.conversations.ui.TimePreference
+            <eu.siacs.conversations.ui.preferences.TimePreference
               android:dependency="enable_quiet_hours"
               android:key="quiet_hours_start"
               android:negativeButtonText="@string/cancel"
               android:positiveButtonText="@string/set"
               android:title="@string/title_pref_quiet_hours_start_time" />
-            <eu.siacs.conversations.ui.TimePreference
+            <eu.siacs.conversations.ui.preferences.TimePreference
               android:dependency="enable_quiet_hours"
               android:key="quiet_hours_end"
               android:negativeButtonText="@string/cancel"
@@ -130,14 +130,14 @@
 			        android:summary="@string/pref_enter_is_send_summary" />
 	        </PreferenceCategory>
             <PreferenceCategory android:title="@string/pref_expert_options_proxy">
-                <ListPreference
+                <eu.siacs.conversations.ui.preferences.SummaryListPreference
                     android:defaultValue="onion"
                     android:entries="@array/proxy_usage"
                     android:entryValues="@array/proxy_usage_values"
                     android:key="proxy_usage"
                     android:summary="@string/pref_proxy_usage_summary"
                     android:title="@string/pref_proxy_usage" />
-                <eu.siacs.conversations.ui.SummaryEditTextPreference
+                <eu.siacs.conversations.ui.preferences.SummaryEditTextPreference
                     android:key="proxy"
                     android:hint="@string/pref_proxy_hint"
                     android:summary="@string/pref_proxy_summary"
@@ -163,7 +163,7 @@
             android:summary="@string/pref_never_send_crash_summary"
             android:title="@string/pref_never_send_crash" />
     </PreferenceCategory>
-		<eu.siacs.conversations.ui.AboutPreference
+		<eu.siacs.conversations.ui.preferences.AboutPreference
 			android:summary="@string/pref_about_conversations_summary"
 			android:title="@string/title_activity_about" />
 </PreferenceScreen>

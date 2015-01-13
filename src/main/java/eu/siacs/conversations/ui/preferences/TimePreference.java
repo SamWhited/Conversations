@@ -1,4 +1,4 @@
-package eu.siacs.conversations.ui;
+package eu.siacs.conversations.ui.preferences;
 
 import android.content.Context;
 import android.content.res.TypedArray;
