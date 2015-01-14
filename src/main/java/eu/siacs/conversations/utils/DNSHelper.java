@@ -32,7 +32,10 @@ public final class DNSHelper {
 	public static Bundle getSRVRecord(final Jid jid, final boolean isUsingTor) throws IOException {
 		final String host = jid.getDomainpart();
 
-		if (!isUsingTor) {
+        if (isUsingTor || host.endsWith(".onion")) {
+            // we should _never_ disclose the usage of a .onion address
+            return queryDNS(host, InetAddress.getLocalHost(), 5400);
+        } else {
 			final String[] dns = client.findDNS();
 
 			if (dns != null) {
@@ -48,13 +51,14 @@ public final class DNSHelper {
 				}
 			}
 			return queryDNS(host, InetAddress.getByName("8.8.8.8"));
-		} else {
-            // TODO: Use port 5400
-			return queryDNS(host, InetAddress.getLocalHost());
 		}
 	}
 
-	private static Bundle queryDNS(final String host, final InetAddress dnsServer) {
+    private static Bundle queryDNS(final String host, final InetAddress dnsServer) {
+        return queryDNS(host, dnsServer, 53);
+    }
+
+	private static Bundle queryDNS(final String host, final InetAddress dnsServer, final int port) {
 		final Bundle bundle = new Bundle();
 		try {
 			final String qname = "_xmpp-client._tcp." + host;
@@ -62,7 +66,7 @@ public final class DNSHelper {
 					"using dns server: " + dnsServer.getHostAddress()
 					+ " to look up " + host);
 			final DNSMessage message = client.query(qname, TYPE.SRV, CLASS.IN,
-					dnsServer.getHostAddress());
+					dnsServer.getHostAddress(), port);
 
 			// How should we handle priorities and weight?
 			// Wikipedia has a nice article about priorities vs. weights:
