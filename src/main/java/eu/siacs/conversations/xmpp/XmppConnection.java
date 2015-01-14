@@ -74,6 +74,7 @@ import eu.siacs.conversations.xmpp.stanzas.streammgmt.AckPacket;
 import eu.siacs.conversations.xmpp.stanzas.streammgmt.EnablePacket;
 import eu.siacs.conversations.xmpp.stanzas.streammgmt.RequestPacket;
 import eu.siacs.conversations.xmpp.stanzas.streammgmt.ResumePacket;
+import info.guardianproject.onionkit.ui.OrbotHelper;
 
 public class XmppConnection implements Runnable {
 
@@ -113,6 +114,7 @@ public class XmppConnection implements Runnable {
 	private final ArrayList<OnAdvancedStreamFeaturesLoaded> advancedStreamFeaturesLoadedListeners = new ArrayList<>();
 	private OnMessageAcknowledged acknowledgedListener = null;
 	private XmppConnectionService mXmppConnectionService = null;
+	private final OrbotHelper orbotHelper;
 
 	private SaslMechanism saslMechanism;
 
@@ -123,6 +125,7 @@ public class XmppConnection implements Runnable {
 		tagWriter = new TagWriter();
 		mXmppConnectionService = service;
 		applicationContext = service.getApplicationContext();
+		orbotHelper = new OrbotHelper(applicationContext);
 	}
 
 	protected void changeStatus(final Account.State nextStatus) {
@@ -495,7 +498,12 @@ public class XmppConnection implements Runnable {
 
 	private boolean isUsingTor() {
 		final String usage = getPreferences().getString("proxy_usage", "onion");
-		return usage.equals("always") || (usage.equals("onion") && account.isOnion());
+
+		if (usage.equals("auto")) {
+			return orbotHelper.isOrbotInstalled() && orbotHelper.isOrbotRunning();
+		} else {
+			return usage.equals("always") || (usage.equals("onion") && account.isOnion());
+		}
 	}
 
 	// TODO: Update to auto detect address and port.
