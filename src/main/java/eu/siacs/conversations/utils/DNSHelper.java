@@ -46,14 +46,14 @@ public final class DNSHelper {
 		return queryDNS(host, InetAddress.getByName("8.8.8.8"));
 	}
 
-	public static Bundle queryDNS(String host, InetAddress dnsServer) {
-		Bundle bundle = new Bundle();
+	public static Bundle queryDNS(final String host, final InetAddress dnsServer) {
+		final Bundle bundle = new Bundle();
 		try {
-			String qname = "_xmpp-client._tcp." + host;
+			final String qname = "_xmpp-client._tcp." + host;
 			Log.d(Config.LOGTAG,
 					"using dns server: " + dnsServer.getHostAddress()
 					+ " to look up " + host);
-			DNSMessage message = client.query(qname, TYPE.SRV, CLASS.IN,
+			final DNSMessage message = client.query(qname, TYPE.SRV, CLASS.IN,
 					dnsServer.getHostAddress());
 
 			// How should we handle priorities and weight?

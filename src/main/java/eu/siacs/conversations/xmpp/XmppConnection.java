@@ -500,7 +500,7 @@ public class XmppConnection implements Runnable {
 
 	// TODO: Update to auto detect port.
 	private int getProxyDnsPort() {
-		return 9050;
+		return 5400;
 	}
 
 	// TODO: Update to auto detect address and port.
