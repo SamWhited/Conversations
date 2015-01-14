@@ -498,20 +498,17 @@ public class XmppConnection implements Runnable {
 		return usage.equals("always") || (usage.equals("onion") && account.isOnion());
 	}
 
+	// TODO: Update to auto detect port.
+	private int getProxyDnsPort() {
+		return 9050;
+	}
+
+	// TODO: Update to auto detect address and port.
 	private Proxy getProxy() {
-		final String[] proxyParts = getPreferences().getString("proxy", "127.0.0.1:9050").split(":", 1);
+		final String proxyAddress = "127.0.0.1";
+		final int port = 9050;
 		final InetSocketAddress address;
-		int port;
-		if (proxyParts.length == 2) {
-			try {
-				port = Integer.valueOf(proxyParts[1]);
-			} catch (final NumberFormatException e) {
-				port = 9050;
-			}
-			address = new InetSocketAddress(proxyParts[0], port);
-		} else {
-			address = new InetSocketAddress(proxyParts[0], 9050);
-		}
+		address = new InetSocketAddress(proxyAddress, port);
 		return new Proxy(Proxy.Type.SOCKS, address);
 	}
 

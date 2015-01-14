@@ -9,13 +9,15 @@
 		<item>Android</item>
 	</string-array>
     <string-array name="proxy_usage">
-        <item>Never</item>
-        <item>Only .onion</item>
-        <item>Always</item>
+        <item>@string/pref_proxy_usage_never</item>
+        <item>@string/pref_proxy_usage_onion</item>
+        <item>@string/pref_proxy_usage_auto</item>
+        <item>@string/pref_proxy_usage_always</item>
     </string-array>
     <string-array name="proxy_usage_values">
         <item>never</item>
         <item>onion</item>
+        <item>auto</item>
         <item>always</item>
     </string-array>
 	<string-array name="filesizes">

@@ -137,11 +137,6 @@
                     android:key="proxy_usage"
                     android:summary="@string/pref_proxy_usage_summary"
                     android:title="@string/pref_proxy_usage" />
-                <eu.siacs.conversations.ui.preferences.SummaryEditTextPreference
-                    android:key="proxy"
-                    android:hint="@string/pref_proxy_hint"
-                    android:summary="@string/pref_proxy_summary"
-                    android:title="@string/pref_proxy_title" />
             </PreferenceCategory>
             <PreferenceCategory android:title="@string/pref_expert_options_other" >
                 <CheckBoxPreference
