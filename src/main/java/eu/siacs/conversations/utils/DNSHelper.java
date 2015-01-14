@@ -49,7 +49,6 @@ public final class DNSHelper {
 			}
 			return queryDNS(host, InetAddress.getByName("8.8.8.8"));
 		} else {
-			// TODO: Update to auto detect port.
 			return queryDNS(host, InetAddress.getByName("127.0.0.1:5400"));
 		}
 	}

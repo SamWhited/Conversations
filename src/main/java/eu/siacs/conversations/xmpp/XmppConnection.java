@@ -506,7 +506,6 @@ public class XmppConnection implements Runnable {
 		}
 	}
 
-	// TODO: Update to auto detect address and port.
 	private Proxy getProxy() {
 		final String proxyAddress = "127.0.0.1";
 		final int port = 9050;
