@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -25,16 +26,17 @@ import eu.siacs.conversations.Config;
 import eu.siacs.conversations.xmpp.jid.Jid;
 
 public final class DNSHelper {
-	private static final Client client = new Client();
+	@SuppressWarnings("StaticVariableOfConcreteClass")
+    private static final Client client = new Client();
 
 	public static Bundle getSRVRecord(final Jid jid) throws IOException {
 		final String host = jid.getDomainpart();
-		String dns[] = client.findDNS();
+		final String[] dns = client.findDNS();
 
 		if (dns != null) {
-			for (String dnsserver : dns) {
-				InetAddress ip = InetAddress.getByName(dnsserver);
-				Bundle b = queryDNS(host, ip);
+			for (final String dnsserver : dns) {
+				final InetAddress ip = InetAddress.getByName(dnsserver);
+				final Bundle b = queryDNS(host, ip);
 				if (b.containsKey("values")) {
 					return b;
 				} else if (b.containsKey("error")
@@ -46,7 +48,7 @@ public final class DNSHelper {
 		return queryDNS(host, InetAddress.getByName("8.8.8.8"));
 	}
 
-	public static Bundle queryDNS(final String host, final InetAddress dnsServer) {
+	private static Bundle queryDNS(final String host, final InetAddress dnsServer) {
 		final Bundle bundle = new Bundle();
 		try {
 			final String qname = "_xmpp-client._tcp." + host;
@@ -64,17 +66,17 @@ public final class DNSHelper {
 			// a random order respecting the weight, and dump that priority by
 			// priority
 
-			TreeMap<Integer, ArrayList<SRV>> priorities = new TreeMap<>();
-			TreeMap<String, ArrayList<String>> ips4 = new TreeMap<>();
-			TreeMap<String, ArrayList<String>> ips6 = new TreeMap<>();
+			final Map<Integer, ArrayList<SRV>> priorities = new TreeMap<>();
+			final Map<String, ArrayList<String>> ips4 = new TreeMap<>();
+			final Map<String, ArrayList<String>> ips6 = new TreeMap<>();
 
-			for (Record[] rrset : new Record[][] { message.getAnswers(),
+			for (final Record[] rrset : new Record[][] { message.getAnswers(),
 				message.getAdditionalResourceRecords() }) {
-				for (Record rr : rrset) {
-					Data d = rr.getPayload();
+				for (final Record rr : rrset) {
+					final Data d = rr.getPayload();
 					if (d instanceof SRV
 							&& NameUtil.idnEquals(qname, rr.getName())) {
-						SRV srv = (SRV) d;
+						final SRV srv = (SRV) d;
 						if (!priorities.containsKey(srv.getPriority())) {
 							priorities.put(srv.getPriority(),
 									new ArrayList<SRV>(2));
@@ -82,14 +84,14 @@ public final class DNSHelper {
 						priorities.get(srv.getPriority()).add(srv);
 							}
 					if (d instanceof A) {
-						A arecord = (A) d;
+						final A arecord = (A) d;
 						if (!ips4.containsKey(rr.getName())) {
 							ips4.put(rr.getName(), new ArrayList<String>(3));
 						}
 						ips4.get(rr.getName()).add(arecord.toString());
 					}
 					if (d instanceof AAAA) {
-						AAAA aaaa = (AAAA) d;
+						final AAAA aaaa = (AAAA) d;
 						if (!ips6.containsKey(rr.getName())) {
 							ips6.put(rr.getName(), new ArrayList<String>(3));
 						}
@@ -98,10 +100,10 @@ public final class DNSHelper {
 				}
 			}
 
-			Random rnd = new Random();
-			ArrayList<SRV> result = new ArrayList<>(
+			final Random rnd = new Random();
+			final ArrayList<SRV> result = new ArrayList<>(
 					priorities.size() * 2 + 1);
-			for (ArrayList<SRV> s : priorities.values()) {
+			for (final ArrayList<SRV> s : priorities.values()) {
 
 				// trivial case
 				if (s.size() <= 1) {
@@ -110,7 +112,7 @@ public final class DNSHelper {
 				}
 
 				long totalweight = 0l;
-				for (SRV srv : s) {
+				for (final SRV srv : s) {
 					totalweight += srv.getWeight();
 				}
 
@@ -124,7 +126,7 @@ public final class DNSHelper {
 					i--;
 					// remove is expensive, but we have only a few entries
 					// anyway
-					SRV srv = s.remove(i);
+					final SRV srv = s.remove(i);
 					totalweight -= srv.getWeight();
 					result.add(srv);
 				}
@@ -138,8 +140,8 @@ public final class DNSHelper {
 				bundle.putString("error", "nosrv");
 				return bundle;
 			}
-			ArrayList<Bundle> values = new ArrayList<>();
-			for (SRV srv : result) {
+			final ArrayList<Bundle> values = new ArrayList<>();
+			for (final SRV srv : result) {
 				boolean added = false;
 				if (ips6.containsKey(srv.getName())) {
 					values.add(createNamePortBundle(srv.getName(),srv.getPort(),ips6));
@@ -154,35 +156,26 @@ public final class DNSHelper {
 				}
 			}
 			bundle.putParcelableArrayList("values", values);
-		} catch (SocketTimeoutException e) {
+		} catch (final SocketTimeoutException e) {
 			bundle.putString("error", "timeout");
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			bundle.putString("error", "unhandled");
 		}
 		return bundle;
 	}
 
-	private static Bundle createNamePortBundle(String name, int port, TreeMap<String, ArrayList<String>> ips) {
-		Bundle namePort = new Bundle();
+	private static Bundle createNamePortBundle(final String name,
+                                               final int port,
+                                               final Map<String, ArrayList<String>> ips) {
+		final Bundle namePort = new Bundle();
 		namePort.putString("name", name);
 		namePort.putInt("port", port);
 		if (ips!=null) {
-			ArrayList<String> ip = ips.get(name);
+			final ArrayList<String> ip = ips.get(name);
 			Collections.shuffle(ip, new Random());
 			namePort.putString("ip", ip.get(0));
 		}
 		return namePort;
 	}
 
-	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-
-	public static String bytesToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 2];
-		for (int j = 0; j < bytes.length; j++) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = hexArray[v >>> 4];
-			hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-		}
-		return new String(hexChars);
-	}
 }
