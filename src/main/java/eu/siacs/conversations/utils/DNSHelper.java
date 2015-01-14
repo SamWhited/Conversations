@@ -27,25 +27,31 @@ import eu.siacs.conversations.xmpp.jid.Jid;
 
 public final class DNSHelper {
 	@SuppressWarnings("StaticVariableOfConcreteClass")
-    private static final Client client = new Client();
+	private static final Client client = new Client();
 
-	public static Bundle getSRVRecord(final Jid jid) throws IOException {
+	public static Bundle getSRVRecord(final Jid jid, final boolean isUsingTor) throws IOException {
 		final String host = jid.getDomainpart();
-		final String[] dns = client.findDNS();
 
-		if (dns != null) {
-			for (final String dnsserver : dns) {
-				final InetAddress ip = InetAddress.getByName(dnsserver);
-				final Bundle b = queryDNS(host, ip);
-				if (b.containsKey("values")) {
-					return b;
-				} else if (b.containsKey("error")
-						&& "nosrv".equals(b.getString("error", null))) {
-					return b;
-						}
+		if (!isUsingTor) {
+			final String[] dns = client.findDNS();
+
+			if (dns != null) {
+				for (final String dnsserver : dns) {
+					final InetAddress ip = InetAddress.getByName(dnsserver);
+					final Bundle b = queryDNS(host, ip);
+					if (b.containsKey("values")) {
+						return b;
+					} else if (b.containsKey("error")
+							&& "nosrv".equals(b.getString("error", null))) {
+						return b;
+							}
+				}
 			}
+			return queryDNS(host, InetAddress.getByName("8.8.8.8"));
+		} else {
+			// TODO: Update to auto detect port.
+			return queryDNS(host, InetAddress.getByName("127.0.0.1:5400"));
 		}
-		return queryDNS(host, InetAddress.getByName("8.8.8.8"));
 	}
 
 	private static Bundle queryDNS(final String host, final InetAddress dnsServer) {
@@ -165,8 +171,8 @@ public final class DNSHelper {
 	}
 
 	private static Bundle createNamePortBundle(final String name,
-                                               final int port,
-                                               final Map<String, ArrayList<String>> ips) {
+			final int port,
+			final Map<String, ArrayList<String>> ips) {
 		final Bundle namePort = new Bundle();
 		namePort.putString("name", name);
 		namePort.putInt("port", port);

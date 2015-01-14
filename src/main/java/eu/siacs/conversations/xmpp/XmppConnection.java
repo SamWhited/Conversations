@@ -156,7 +156,7 @@ public class XmppConnection implements Runnable {
 			packetCallbacks.clear();
 			this.changeStatus(Account.State.CONNECTING);
 			// TODO: Use proxy for SRV lookups.
-			final Bundle result = DNSHelper.getSRVRecord(account.getServer());
+			final Bundle result = DNSHelper.getSRVRecord(account.getServer(), isUsingTor());
 			final ArrayList<Parcelable> values = result.getParcelableArrayList("values");
 			if ("timeout".equals(result.getString("error"))) {
 				throw new IOException("timeout in dns");
@@ -187,7 +187,7 @@ public class XmppConnection implements Runnable {
 									+ ": using values from dns "
 									+ srvRecordServer + ":" + srvRecordPort);
 						}
-						if (usingProxy()) {
+						if (isUsingTor()) {
 							socket = new Socket(getProxy());
 						} else {
 							socket = new Socket();
@@ -207,7 +207,7 @@ public class XmppConnection implements Runnable {
 				}
 			} else if (account.isOnion() || (result.containsKey("error")
 						&& "nosrv".equals(result.getString("error", null)))) {
-				if (usingProxy()) {
+				if (isUsingTor()) {
 					socket = new Socket(getProxy());
 				} else {
 					socket = new Socket();
@@ -493,14 +493,9 @@ public class XmppConnection implements Runnable {
 		return PreferenceManager.getDefaultSharedPreferences(applicationContext);
 	}
 
-	private boolean usingProxy() {
+	private boolean isUsingTor() {
 		final String usage = getPreferences().getString("proxy_usage", "onion");
 		return usage.equals("always") || (usage.equals("onion") && account.isOnion());
-	}
-
-	// TODO: Update to auto detect port.
-	private int getProxyDnsPort() {
-		return 5400;
 	}
 
 	// TODO: Update to auto detect address and port.
