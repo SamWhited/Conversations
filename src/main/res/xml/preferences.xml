@@ -129,7 +129,7 @@
 			        android:title="@string/pref_enter_is_send"
 			        android:summary="@string/pref_enter_is_send_summary" />
 	        </PreferenceCategory>
-            <PreferenceCategory android:title="@string/pref_expert_options_proxy">
+            <PreferenceCategory android:title="@string/pref_expert_options_other" >
                 <eu.siacs.conversations.ui.preferences.SummaryListPreference
                     android:defaultValue="onion"
                     android:entries="@array/proxy_usage"
@@ -137,8 +137,6 @@
                     android:key="proxy_usage"
                     android:summary="@string/pref_proxy_usage_summary"
                     android:title="@string/pref_proxy_usage" />
-            </PreferenceCategory>
-            <PreferenceCategory android:title="@string/pref_expert_options_other" >
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="indicate_received"

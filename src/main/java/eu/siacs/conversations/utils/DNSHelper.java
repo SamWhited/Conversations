@@ -49,7 +49,8 @@ public final class DNSHelper {
 			}
 			return queryDNS(host, InetAddress.getByName("8.8.8.8"));
 		} else {
-			return queryDNS(host, InetAddress.getByName("127.0.0.1:5400"));
+            // TODO: Use port 5400
+			return queryDNS(host, InetAddress.getLocalHost());
 		}
 	}
 

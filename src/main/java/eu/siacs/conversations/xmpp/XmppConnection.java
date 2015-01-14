@@ -158,7 +158,6 @@ public class XmppConnection implements Runnable {
 			tagWriter = new TagWriter();
 			packetCallbacks.clear();
 			this.changeStatus(Account.State.CONNECTING);
-			// TODO: Use proxy for SRV lookups.
 			final Bundle result = DNSHelper.getSRVRecord(account.getServer(), isUsingTor());
 			final ArrayList<Parcelable> values = result.getParcelableArrayList("values");
 			if ("timeout".equals(result.getString("error"))) {
