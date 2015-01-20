@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import eu.siacs.conversations.services.XmppConnectionService;
+import eu.siacs.conversations.utils.Xmlns;
 
 public abstract class AbstractGenerator {
 	public final String[] FEATURES = {"urn:xmpp:jingle:1",
@@ -22,7 +23,7 @@ public abstract class AbstractGenerator {
 			"jabber:x:conference", "http://jabber.org/protocol/caps",
 			"http://jabber.org/protocol/disco#info",
 			"urn:xmpp:avatar:metadata+notify",
-			"urn:xmpp:ping"};
+			"urn:xmpp:ping", Xmlns.MESSAGE_CORRECTION};
 	public final String IDENTITY_NAME = "Conversations 1.0-beta";
 	public final String IDENTITY_TYPE = "phone";
 

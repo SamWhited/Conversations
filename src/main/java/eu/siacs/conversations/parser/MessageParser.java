@@ -13,6 +13,7 @@ import eu.siacs.conversations.http.HttpConnectionManager;
 import eu.siacs.conversations.services.MessageArchiveService;
 import eu.siacs.conversations.services.XmppConnectionService;
 import eu.siacs.conversations.utils.CryptoHelper;
+import eu.siacs.conversations.utils.Xmlns;
 import eu.siacs.conversations.xml.Element;
 import eu.siacs.conversations.xmpp.OnMessagePacketReceived;
 import eu.siacs.conversations.xmpp.jid.Jid;
@@ -23,6 +24,20 @@ public class MessageParser extends AbstractParser implements
 		OnMessagePacketReceived {
 	public MessageParser(XmppConnectionService service) {
 		super(service);
+	}
+
+	private static void parseMessageCorrection(final MessagePacket packet, final Message message) {
+		if (packet.hasChild("replace", Xmlns.MESSAGE_CORRECTION)) {
+			final String id = packet.findChild("replace", Xmlns.MESSAGE_CORRECTION).getAttribute("id");
+			if (id != null && !id.isEmpty()) {
+				final Message lastMessage = message.getConversation().findLastTextMessageFromJid(
+						message.getCounterpart());
+				// Only allow replacements for the last message per XEP-0308's business rules.
+				if (lastMessage.getRemoteMsgId().equals(id)) {
+					message.replacesUuid = lastMessage.getUuid();
+				}
+			}
+		}
 	}
 
 	private Message parseChat(MessagePacket packet, Account account) {
@@ -52,10 +67,10 @@ public class MessageParser extends AbstractParser implements
 			if (conversation.hasDuplicateMessage(finishedMessage)) {
 				return null;
 			}
-
 		}
 		finishedMessage.setCounterpart(jid);
 		finishedMessage.setTime(getTimestamp(packet));
+		parseMessageCorrection(packet, finishedMessage);
 		return finishedMessage;
 	}
 
@@ -122,6 +137,7 @@ public class MessageParser extends AbstractParser implements
 			finishedMessage.setRemoteMsgId(packet.getId());
 			finishedMessage.markable = isMarkable(packet);
 			finishedMessage.setCounterpart(from);
+			parseMessageCorrection(packet, finishedMessage);
 			return finishedMessage;
 		} catch (Exception e) {
 			conversation.resetOtrSession();
@@ -199,6 +215,7 @@ public class MessageParser extends AbstractParser implements
 				&& conversation.hasDuplicateMessage(finishedMessage)) {
 			return null;
 		}
+		parseMessageCorrection(packet, finishedMessage);
 		finishedMessage.setTime(getTimestamp(packet));
 		return finishedMessage;
 	}
@@ -285,6 +302,7 @@ public class MessageParser extends AbstractParser implements
 				return null;
 			}
 		}
+		parseMessageCorrection(packet, finishedMessage);
 		return finishedMessage;
 	}
 
@@ -348,6 +366,7 @@ public class MessageParser extends AbstractParser implements
 		if (query!=null) {
 			query.incrementMessageCount();
 		}
+		parseMessageCorrection(packet, finishedMessage);
 		return finishedMessage;
 	}
 

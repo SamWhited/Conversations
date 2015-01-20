@@ -22,9 +22,9 @@ public class DatabaseBackend extends SQLiteOpenHelper {
 	private static DatabaseBackend instance = null;
 
 	private static final String DATABASE_NAME = "history";
-	private static final int DATABASE_VERSION = 13;
+	private static final int DATABASE_VERSION = 14;
 
-	private static String CREATE_CONTATCS_STATEMENT = "create table "
+	private static final String CREATE_CONTACTS_STATEMENT = "create table "
 			+ Contact.TABLENAME + "(" + Contact.ACCOUNT + " TEXT, "
 			+ Contact.SERVERNAME + " TEXT, " + Contact.SYSTEMNAME + " TEXT,"
 			+ Contact.JID + " TEXT," + Contact.KEYS + " TEXT,"
@@ -41,7 +41,7 @@ public class DatabaseBackend extends SQLiteOpenHelper {
 	}
 
 	@Override
-	public void onCreate(SQLiteDatabase db) {
+	public void onCreate(final SQLiteDatabase db) {
 		db.execSQL("PRAGMA foreign_keys=ON;");
 		db.execSQL("create table " + Account.TABLENAME + "(" + Account.UUID
 				+ " TEXT PRIMARY KEY," + Account.USERNAME + " TEXT,"
@@ -65,13 +65,14 @@ public class DatabaseBackend extends SQLiteOpenHelper {
 				+ Message.BODY + " TEXT, " + Message.ENCRYPTION + " NUMBER, "
 				+ Message.STATUS + " NUMBER," + Message.TYPE + " NUMBER, "
 				+ Message.RELATIVE_FILE_PATH + " TEXT, "
+				+ Message.REPLACES + " TEXT, "
 				+ Message.SERVER_MSG_ID + " TEXT, "
 				+ Message.REMOTE_MSG_ID + " TEXT, FOREIGN KEY("
 				+ Message.CONVERSATION + ") REFERENCES "
 				+ Conversation.TABLENAME + "(" + Conversation.UUID
 				+ ") ON DELETE CASCADE);");
 
-		db.execSQL(CREATE_CONTATCS_STATEMENT);
+		db.execSQL(CREATE_CONTACTS_STATEMENT);
 	}
 
 	@Override
@@ -86,7 +87,7 @@ public class DatabaseBackend extends SQLiteOpenHelper {
 		}
 		if (oldVersion < 5 && newVersion >= 5) {
 			db.execSQL("DROP TABLE " + Contact.TABLENAME);
-			db.execSQL(CREATE_CONTATCS_STATEMENT);
+			db.execSQL(CREATE_CONTACTS_STATEMENT);
 			db.execSQL("UPDATE " + Account.TABLENAME + " SET "
 					+ Account.ROSTERVERSION + " = NULL");
 		}
@@ -129,6 +130,10 @@ public class DatabaseBackend extends SQLiteOpenHelper {
 		if (oldVersion < 13 && newVersion >= 13) {
 			db.execSQL("delete from "+Contact.TABLENAME);
 			db.execSQL("update "+Account.TABLENAME+" set "+Account.ROSTERVERSION+" = NULL");
+		}
+		if (oldVersion < 14 && newVersion >=14) {
+			db.execSQL("ALTER TABLE " + Message.TABLENAME + " ADD COLUMN "
+					+ Message.REPLACES + " TEXT");
 		}
 	}
 
@@ -346,16 +351,16 @@ public class DatabaseBackend extends SQLiteOpenHelper {
 		return conversation;
 	}
 
-	public Message findMessageByUuid(String messageUuid) {
-		SQLiteDatabase db = this.getReadableDatabase();
-		String[] selectionArgs = { messageUuid };
-		Cursor cursor = db.query(Message.TABLENAME, null, Message.UUID + "=?",
+	public Message findMessageByUuid(final String messageUuid) {
+		final SQLiteDatabase db = this.getReadableDatabase();
+		final String[] selectionArgs = { messageUuid };
+		final Cursor cursor = db.query(Message.TABLENAME, null, Message.UUID + "=?",
 				selectionArgs, null, null, null);
 		if (cursor.getCount() == 0) {
 			return null;
 		}
 		cursor.moveToFirst();
-		Message message = Message.fromCursor(cursor);
+		final Message message = Message.fromCursor(cursor);
 		cursor.close();
 		return message;
 	}

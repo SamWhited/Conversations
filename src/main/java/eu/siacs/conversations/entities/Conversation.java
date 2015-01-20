@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.os.SystemClock;
 
 import net.java.otr4j.OtrException;
-import net.java.otr4j.crypto.OtrCryptoEngineImpl;
 import net.java.otr4j.crypto.OtrCryptoException;
 import net.java.otr4j.session.SessionID;
 import net.java.otr4j.session.SessionImpl;
@@ -16,6 +15,7 @@ import org.json.JSONObject;
 
 import java.security.interfaces.DSAPublicKey;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -98,6 +98,17 @@ public class Conversation extends AbstractEntity implements Blockable {
 		return null;
 	}
 
+	public Message findLastTextMessageFromJid(final Jid jid) {
+		synchronized (this.messages) {
+			for (final Message message : this.messages) {
+				if (message.getCounterpart().equals(jid) && message.getType() == Message.TYPE_TEXT) {
+					return message;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void findWaitingMessages(OnMessageFound onMessageFound) {
 		synchronized (this.messages) {
 			for(Message message : this.messages) {
@@ -159,31 +170,31 @@ public class Conversation extends AbstractEntity implements Blockable {
 		}
 	}
 
-	public void findUnsentTextMessages(OnMessageFound onMessageFound) {
+	public void findUnsentTextMessages(final OnMessageFound onMessageFound) {
 		synchronized (this.messages) {
-			for (Message message : this.messages) {
+			for (final Message message : this.messages) {
 				if (message.getType() != Message.TYPE_IMAGE
 						&& message.getStatus() == Message.STATUS_UNSEND) {
 					onMessageFound.onMessageFound(message);
-						}
+				}
 			}
 		}
 	}
 
-	public Message findSentMessageWithUuid(String uuid) {
+	public Message findSentMessageWithUuid(final String uuid) {
 		synchronized (this.messages) {
-			for (Message message : this.messages) {
+			for (final Message message : this.messages) {
 				if (uuid.equals(message.getUuid())
 						|| (message.getStatus() >= Message.STATUS_SEND && uuid
 							.equals(message.getRemoteMsgId()))) {
 					return message;
-							}
+				}
 			}
 		}
 		return null;
 	}
 
-	public void populateWithMessages(final List<Message> messages) {
+	public void populateWithMessages(final Collection<Message> messages) {
 		synchronized (this.messages) {
 			messages.clear();
 			messages.addAll(this.messages);

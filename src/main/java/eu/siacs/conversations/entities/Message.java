@@ -47,6 +47,7 @@ public class Message extends AbstractEntity {
 	public static final String REMOTE_MSG_ID = "remoteMsgId";
 	public static final String SERVER_MSG_ID = "serverMsgId";
 	public static final String RELATIVE_FILE_PATH = "relativeFilePath";
+	public static final String REPLACES = "replacesUuid";
 
 	public boolean markable = false;
 	protected String conversationUuid;
@@ -66,16 +67,16 @@ public class Message extends AbstractEntity {
 	protected Downloadable downloadable = null;
 	private Message mNextMessage = null;
 	private Message mPreviousMessage = null;
+	public String replacesUuid = null;
 
 	private Message() {
-
 	}
 
-	public Message(Conversation conversation, String body, int encryption) {
+	public Message(final Conversation conversation, final String body, final int encryption) {
 		this(conversation, body, encryption, STATUS_UNSEND);
 	}
 
-	public Message(Conversation conversation, String body, int encryption, int status) {
+	public Message(final Conversation conversation, final String body, final int encryption, final int status) {
 		this(java.util.UUID.randomUUID().toString(),
 				conversation.getUuid(),
 				conversation.getJid() == null ? null : conversation.getJid().toBareJid(),
@@ -87,6 +88,7 @@ public class Message extends AbstractEntity {
 				TYPE_TEXT,
 				null,
 				null,
+				null,
 				null);
 		this.conversation = conversation;
 	}
@@ -94,7 +96,7 @@ public class Message extends AbstractEntity {
 	private Message(final String uuid, final String conversationUUid, final Jid counterpart,
 			final Jid trueCounterpart, final String body, final long timeSent,
 			final int encryption, final int status, final int type, final String remoteMsgId,
-			final String relativeFilePath, final String serverMsgId) {
+			final String relativeFilePath, final String serverMsgId, final String replacesUuid) {
 		this.uuid = uuid;
 		this.conversationUuid = conversationUUid;
 		this.counterpart = counterpart;
@@ -107,12 +109,13 @@ public class Message extends AbstractEntity {
 		this.remoteMsgId = remoteMsgId;
 		this.relativeFilePath = relativeFilePath;
 		this.serverMsgId = serverMsgId;
+		this.replacesUuid = replacesUuid;
 	}
 
-	public static Message fromCursor(Cursor cursor) {
+	public static Message fromCursor(final Cursor cursor) {
 		Jid jid;
 		try {
-			String value = cursor.getString(cursor.getColumnIndex(COUNTERPART));
+			final String value = cursor.getString(cursor.getColumnIndex(COUNTERPART));
 			if (value != null) {
 				jid = Jid.fromString(value);
 			} else {
@@ -143,11 +146,12 @@ public class Message extends AbstractEntity {
 				cursor.getInt(cursor.getColumnIndex(TYPE)),
 				cursor.getString(cursor.getColumnIndex(REMOTE_MSG_ID)),
 				cursor.getString(cursor.getColumnIndex(RELATIVE_FILE_PATH)),
-				cursor.getString(cursor.getColumnIndex(SERVER_MSG_ID)));
+				cursor.getString(cursor.getColumnIndex(SERVER_MSG_ID)),
+				cursor.getString(cursor.getColumnIndex(REPLACES)));
 	}
 
-	public static Message createStatusMessage(Conversation conversation) {
-		Message message = new Message();
+	public static Message createStatusMessage(final Conversation conversation) {
+		final Message message = new Message();
 		message.setType(Message.TYPE_STATUS);
 		message.setConversation(conversation);
 		return message;
@@ -175,7 +179,7 @@ public class Message extends AbstractEntity {
 		values.put(TYPE, type);
 		values.put(REMOTE_MSG_ID, remoteMsgId);
 		values.put(RELATIVE_FILE_PATH, relativeFilePath);
-		values.put(SERVER_MSG_ID,serverMsgId);
+		values.put(SERVER_MSG_ID, serverMsgId);
 		return values;
 	}
 
@@ -355,25 +359,33 @@ public class Message extends AbstractEntity {
 
 	public boolean mergeable(final Message message) {
 		return message != null &&
-			(message.getType() == Message.TYPE_TEXT &&
-			 this.getDownloadable() == null &&
-			 message.getDownloadable() == null &&
-			 message.getEncryption() != Message.ENCRYPTION_PGP &&
-			 this.getType() == message.getType() &&
-			 this.getStatus() == message.getStatus() &&
-			 this.getEncryption() == message.getEncryption() &&
-			 this.getCounterpart() != null &&
-			 this.getCounterpart().equals(message.getCounterpart()) &&
-			 (message.getTimeSent() - this.getTimeSent()) <= (Config.MESSAGE_MERGE_WINDOW * 1000) &&
-			 !message.bodyContainsDownloadable() &&
-			 !this.bodyContainsDownloadable() &&
-			 !this.body.startsWith("/me ")
-			);
+				(message.getType() == Message.TYPE_TEXT &&
+						this.getDownloadable() == null &&
+						message.getDownloadable() == null &&
+						message.getEncryption() != Message.ENCRYPTION_PGP &&
+						this.getType() == message.getType() &&
+						this.getStatus() == message.getStatus() &&
+						this.getEncryption() == message.getEncryption() &&
+						this.getCounterpart() != null &&
+						this.getCounterpart().equals(message.getCounterpart()) &&
+						(message.getTimeSent() - this.getTimeSent()) <= (Config.MESSAGE_MERGE_WINDOW * 1000) &&
+						!message.bodyContainsDownloadable() &&
+						!this.bodyContainsDownloadable() &&
+						!this.body.startsWith("/me ") &&
+						!this.isCorrection()
+				);
+	}
+
+	public boolean isCorrection() {
+		return replacesUuid != null && !replacesUuid.isEmpty();
 	}
 
 	public String getMergedBody() {
 		final Message next = this.next();
 		if (this.mergeable(next)) {
+			if (this.isCorrection()) {
+				return next.getMergedBody();
+			}
 			return getBody() + '\n' + next.getMergedBody();
 		}
 		return getBody();
