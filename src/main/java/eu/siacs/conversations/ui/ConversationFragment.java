@@ -8,7 +8,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.graphics.Palette;
 import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -565,7 +570,7 @@ public class ConversationFragment extends Fragment {
 		}
 	}
 
-	public void reInit(Conversation conversation) {
+	public void reInit(final Conversation conversation) {
 		if (conversation == null) {
 			return;
 		}
@@ -582,6 +587,40 @@ public class ConversationFragment extends Fragment {
 		}
 		this.mEditMessage.setText("");
 		this.mEditMessage.append(this.conversation.getNextMessage());
+
+		final Contact contact = conversation.getContact();
+		final Bitmap avatar;
+		if (conversation.getMode() == Conversation.MODE_SINGLE &&
+				(avatar = activity.avatarService().get(contact, 64)) != null) {
+			Palette.generateAsync(
+					avatar,
+					new Palette.PaletteAsyncListener() {
+						public void onGenerated(final Palette palette) {
+							final int color = palette.getVibrantColor(
+									getResources().getColor(R.color.primary)
+							);
+							if (activity.getActionBar() != null) {
+								activity.getActionBar().setBackgroundDrawable(
+										new ColorDrawable(color));
+							}
+							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+								final float[] hsv = new float[3];
+								Color.colorToHSV(color, hsv);
+								hsv[2] *= 0.8f;
+								activity.getWindow().setStatusBarColor(Color.HSVToColor(hsv));
+							}
+						}
+					}
+			);
+		} else {
+			if (activity.getActionBar() != null) {
+				activity.getActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.primary)));
+			}
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				activity.getWindow().setStatusBarColor(getResources().getColor(R.color.primarydark));
+			}
+		}
+
 		this.messagesView.invalidateViews();
 		updateMessages();
 		this.messagesLoaded = true;

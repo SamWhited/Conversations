@@ -140,11 +140,11 @@ public class ConversationActivity extends XmppActivity
 		super.onCreate(savedInstanceState);
 		if (savedInstanceState != null) {mOpenConverstaion = savedInstanceState.getString(
 				STATE_OPEN_CONVERSATION, null);
-		mPanelOpen = savedInstanceState.getBoolean(STATE_PANEL_OPEN, true);
-		String pending = savedInstanceState.getString(STATE_PENDING_URI, null);
-		if (pending != null) {
-			mPendingImageUri = Uri.parse(pending);
-		}
+			mPanelOpen = savedInstanceState.getBoolean(STATE_PANEL_OPEN, true);
+			String pending = savedInstanceState.getString(STATE_PENDING_URI, null);
+			if (pending != null) {
+				mPendingImageUri = Uri.parse(pending);
+			}
 		}
 
 		setContentView(R.layout.fragment_conversations_overview);

@@ -411,7 +411,7 @@ public class Contact implements ListItem, Blockable {
 		return getJid().toDomainJid();
 	}
 
-	public boolean setAvatar(String filename) {
+	public boolean setAvatar(final String filename) {
 		if (this.avatar != null && this.avatar.equals(filename)) {
 			return false;
 		} else {
