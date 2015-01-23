@@ -4,13 +4,16 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationCompat.BigPictureStyle;
@@ -42,7 +45,7 @@ import eu.siacs.conversations.ui.ManageAccountActivity;
 import eu.siacs.conversations.ui.TimePreference;
 import eu.siacs.conversations.utils.UIHelper;
 
-public class NotificationService {
+public class NotificationService extends BroadcastReceiver {
 
 	private final XmppConnectionService mXmppConnectionService;
 
@@ -51,6 +54,9 @@ public class NotificationService {
 	public static final int NOTIFICATION_ID = 0x2342;
 	public static final int FOREGROUND_NOTIFICATION_ID = 0x8899;
 	public static final int ERROR_NOTIFICATION_ID = 0x5678;
+
+	public static final String ACTION_GET_UNREAD = "eu.siacs.conversations.GET_UNREAD";
+	public static final String EXTRA_UNREAD_COUNT = "unread_count";
 
 	private Conversation mOpenConversation;
 	private boolean mIsInForeground;
@@ -498,5 +504,17 @@ public class NotificationService {
 
 		mBuilder.setContentIntent(resultPendingIntent);
 		mNotificationManager.notify(ERROR_NOTIFICATION_ID, mBuilder.build());
+	}
+
+	@Override
+	public void onReceive(final Context context, final Intent intent) {
+		if (ACTION_GET_UNREAD.equals(intent.getAction())) {
+			final ResultReceiver count = intent.getParcelableExtra(EXTRA_UNREAD_COUNT);
+			if (count != null) {
+				final Bundle bundle = new Bundle();
+				bundle.putInt(EXTRA_UNREAD_COUNT, notifications.size());
+				count.send(0, bundle);
+			}
+		}
 	}
 }

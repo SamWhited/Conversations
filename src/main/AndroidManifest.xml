@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="eu.siacs.conversations"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="eu.siacs.conversations" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -79,9 +78,9 @@
         <activity
             android:name=".ui.BlocklistActivity"
             android:label="@string/title_activity_block_list" />
-	    <activity
-		    android:name=".ui.ChangePasswordActivity"
-		    android:label="@string/change_password_on_server" />
+        <activity
+            android:name=".ui.ChangePasswordActivity"
+            android:label="@string/change_password_on_server" />
         <activity
             android:name=".ui.ManageAccountActivity"
             android:configChanges="orientation|screenSize"
@@ -126,7 +125,7 @@
         <activity
             android:name="de.duenndns.ssl.MemorizingActivity"
             android:theme="@style/ConversationsTheme"
-            tools:replace="android:theme"/>
+            tools:replace="android:theme" />
         <activity
             android:name=".ui.AboutActivity"
             android:label="@string/title_activity_about"
@@ -135,6 +134,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="eu.siacs.conversations.ui.SettingsActivity" />
         </activity>
+
+        <receiver android:name=".ConversationsIconWidget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/conversations_icon_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

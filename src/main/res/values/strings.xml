@@ -273,8 +273,7 @@
     <string name="pref_expert_options_summary">Please be careful with these</string>
     <string name="title_activity_about">About Conversations</string>
     <string name="pref_about_conversations_summary">Build and licensing information</string>
-    <string name="pref_about_message" translatable="false">
-            Conversations • the very last word in instant messaging.
+    <string name="pref_about_message" translatable="false">            Conversations • the very last word in instant messaging.
             \n\nCopyright © 2014 Daniel Gultsch
             \n\nThis program is free software: you can redistribute it and/or modify
             it under the terms of the GNU General Public License as published by
@@ -295,8 +294,7 @@
             \n\nhttps://github.com/open-keychain/openkeychain-api-lib\n(Apache License, Version 2.0)
             \n\nhttps://github.com/jitsi/otr4j\n(LGPL-3.0)
             \n\nhttps://developer.android.com/tools/support-library\n(Apache License, Version 2.0)
-            \n\nhttps://github.com/zxing/zxing\n(Apache License, Version 2.0)
-    </string>
+            \n\nhttps://github.com/zxing/zxing\n(Apache License, Version 2.0)</string>
     <string name="title_pref_quiet_hours">Quiet Hours</string>
     <string name="title_pref_quiet_hours_start_time">Start time</string>
     <string name="title_pref_quiet_hours_end_time">End time</string>
@@ -391,57 +389,60 @@
     <string name="shared_secret_hint_should_not_be_empty">Your hint should not be empty</string>
     <string name="shared_secret_can_not_be_empty">Your shared secret can not be empty</string>
     <string name="manual_verification_explanation">Carefully compare the fingerprint shown below with the fingerprint of your contact.\nYou can use any trusted form of communication like an encrypted e-mail or a telephone call to exchange those.</string>
-	<string name="change_password">Change password</string>
-	<string name="current_password">Current password</string>
-	<string name="new_password">New password</string>
-	<string name="password_should_not_be_empty">Password should not be empty</string>
-	<string name="enable_all_accounts">Enable all accounts</string>
-	<string name="disable_all_accounts">Disable all accounts</string>
-	<string name="perform_action_with">Perform action with</string>
-	<string name="no_affiliation">No affiliation</string>
-	<string name="no_role">No role</string>
-	<string name="outcast">Outcast</string>
-	<string name="member">Member</string>
-	<string name="advanced_mode">Advanced mode</string>
-	<string name="grant_membership">Grant membership</string>
-	<string name="remove_membership">Revoke membership</string>
-	<string name="grant_admin_privileges">Grant admin privileges</string>
-	<string name="remove_admin_privileges">Revoke admin privileges</string>
-	<string name="remove_from_room">Remove from conference</string>
-	<string name="could_not_change_affiliation">Could not change affiliation of %s</string>
-	<string name="ban_from_conference">Ban from conference</string>
-	<string name="removing_from_public_conference">You are trying to remove %s from a public conference. The only way to do that is to ban that user for ever.</string>
-	<string name="ban_now">Ban now</string>
-	<string name="could_not_change_role">Could not change role of %s</string>
-	<string name="public_conference">Publicly accessible conference</string>
-	<string name="private_conference">Private, members only conference</string>
-	<string name="conference_options">Conference options</string>
-	<string name="members_only">Private (Members only)</string>
-	<string name="non_anonymous">Non-anonymous</string>
-	<string name="modified_conference_options">Modified conference options!</string>
-	<string name="could_not_modify_conference_options">Could not modify conference options</string>
-	<string name="never">Never</string>
-	<string name="thirty_minutes">30 minutes</string>
-	<string name="one_hour">1 hour</string>
-	<string name="two_hours">2 hours</string>
-	<string name="eight_hours">8 hours</string>
-	<string name="until_further_notice">Until further notice</string>
-	<string name="pref_input_options">Input options</string>
-	<string name="pref_enter_is_send">Enter is send</string>
-	<string name="pref_enter_is_send_summary">Use enter key to send message</string>
-	<string name="pref_display_enter_key">Show enter key</string>
-	<string name="pref_display_enter_key_summary">Change the emoticons key to an enter key</string>
-	<string name="audio">audio</string>
-	<string name="video">video</string>
-	<string name="image">image</string>
-	<string name="pdf_document">PDF document</string>
-	<string name="apk">Android App</string>
-	<string name="vcard">Contact</string>
-	<string name="received_x_file">Received %s</string>
-	<string name="disable_foreground_service">Disable foreground service</string>
-	<string name="touch_to_open_conversations">Touch to open Conversations</string>
-	<string name="avatar_has_been_published">Avatar has been published!</string>
+    <string name="change_password">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="password_should_not_be_empty">Password should not be empty</string>
+    <string name="enable_all_accounts">Enable all accounts</string>
+    <string name="disable_all_accounts">Disable all accounts</string>
+    <string name="perform_action_with">Perform action with</string>
+    <string name="no_affiliation">No affiliation</string>
+    <string name="no_role">No role</string>
+    <string name="outcast">Outcast</string>
+    <string name="member">Member</string>
+    <string name="advanced_mode">Advanced mode</string>
+    <string name="grant_membership">Grant membership</string>
+    <string name="remove_membership">Revoke membership</string>
+    <string name="grant_admin_privileges">Grant admin privileges</string>
+    <string name="remove_admin_privileges">Revoke admin privileges</string>
+    <string name="remove_from_room">Remove from conference</string>
+    <string name="could_not_change_affiliation">Could not change affiliation of %s</string>
+    <string name="ban_from_conference">Ban from conference</string>
+    <string name="removing_from_public_conference">You are trying to remove %s from a public conference. The only way to do that is to ban that user for ever.</string>
+    <string name="ban_now">Ban now</string>
+    <string name="could_not_change_role">Could not change role of %s</string>
+    <string name="public_conference">Publicly accessible conference</string>
+    <string name="private_conference">Private, members only conference</string>
+    <string name="conference_options">Conference options</string>
+    <string name="members_only">Private (Members only)</string>
+    <string name="non_anonymous">Non-anonymous</string>
+    <string name="modified_conference_options">Modified conference options!</string>
+    <string name="could_not_modify_conference_options">Could not modify conference options</string>
+    <string name="never">Never</string>
+    <string name="thirty_minutes">30 minutes</string>
+    <string name="one_hour">1 hour</string>
+    <string name="two_hours">2 hours</string>
+    <string name="eight_hours">8 hours</string>
+    <string name="until_further_notice">Until further notice</string>
+    <string name="pref_input_options">Input options</string>
+    <string name="pref_enter_is_send">Enter is send</string>
+    <string name="pref_enter_is_send_summary">Use enter key to send message</string>
+    <string name="pref_display_enter_key">Show enter key</string>
+    <string name="pref_display_enter_key_summary">Change the emoticons key to an enter key</string>
+    <string name="audio">audio</string>
+    <string name="video">video</string>
+    <string name="image">image</string>
+    <string name="pdf_document">PDF document</string>
+    <string name="apk">Android App</string>
+    <string name="vcard">Contact</string>
+    <string name="received_x_file">Received %s</string>
+    <string name="disable_foreground_service">Disable foreground service</string>
+    <string name="touch_to_open_conversations">Touch to open Conversations</string>
+    <string name="avatar_has_been_published">Avatar has been published!</string>
     <string name="sending_x_file">Sending %s</string>
     <string name="offering_x_file">Offering %s</string>
     <string name="hide_offline">Hide offline</string>
+    <string name="add_widget">Add widget</string>
+    <string name="x_new_messages">%s new</string>
+
 </resources>
