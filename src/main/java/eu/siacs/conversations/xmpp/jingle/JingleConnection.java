@@ -1,5 +1,10 @@
 package eu.siacs.conversations.xmpp.jingle;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.SystemClock;
+import android.util.Log;
+
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,10 +14,6 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.SystemClock;
-import android.util.Log;
 import eu.siacs.conversations.Config;
 import eu.siacs.conversations.entities.Account;
 import eu.siacs.conversations.entities.Conversation;
@@ -40,7 +41,7 @@ public class JingleConnection implements Downloadable {
 	protected static final int JINGLE_STATUS_TRANSMITTING = 5;
 	protected static final int JINGLE_STATUS_FAILED = 99;
 
-	private int ibbBlockSize = 4096;
+	private int ibbBlockSize = Config.IBB_BLOCK_SIZE;
 
 	private int mJingleStatus = -1;
 	private int mStatus = Downloadable.STATUS_UNKNOWN;
