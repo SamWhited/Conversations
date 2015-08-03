@@ -1,6 +1,7 @@
 package eu.siacs.conversations.xmpp.jingle.stanzas;
 
 import eu.siacs.conversations.entities.DownloadableFile;
+import eu.siacs.conversations.utils.Xmlns;
 import eu.siacs.conversations.xml.Element;
 
 public class Content extends Element {
@@ -67,6 +68,10 @@ public class Content extends Element {
 			this.transportId = socks5transport().getAttribute("sid");
 		} else if (hasIbbTransport()) {
 			this.transportId = ibbTransport().getAttribute("sid");
+		} else if (hasIceUdpTransport()) {
+			this.transportId = iceUdpTransport().getAttribute("sid");
+		} else if (hasRawUdpTransport()) {
+			this.transportId = rawUdpTransport().getAttribute("sid");
 		}
 		return this.transportId;
 	}
@@ -93,11 +98,41 @@ public class Content extends Element {
 		return transport;
 	}
 
+	public Element rawUdpTransport() {
+		Element transport = this.findChild("transport",
+				Xmlns.JINGLE_RAW_UDP_TRANSPORT);
+		if (transport == null) {
+			transport = this.addChild("transport",
+					Xmlns.JINGLE_RAW_UDP_TRANSPORT);
+			transport.setAttribute("sid", this.transportId);
+		}
+		return transport;
+	}
+
+	public Element iceUdpTransport() {
+		Element transport = this.findChild("transport",
+				Xmlns.JINGLE_ICE_UDP_TRANSPORT);
+		if (transport == null) {
+			transport = this.addChild("transport",
+					Xmlns.JINGLE_ICE_UDP_TRANSPORT);
+			transport.setAttribute("sid", this.transportId);
+		}
+		return transport;
+	}
+
 	public boolean hasSocks5Transport() {
 		return this.hasChild("transport", "urn:xmpp:jingle:transports:s5b:1");
 	}
 
 	public boolean hasIbbTransport() {
 		return this.hasChild("transport", "urn:xmpp:jingle:transports:ibb:1");
+	}
+
+	public boolean hasRawUdpTransport() {
+		return this.hasChild("transport", Xmlns.JINGLE_RAW_UDP_TRANSPORT);
+	}
+
+	public boolean hasIceUdpTransport() {
+		return this.hasChild("transport", Xmlns.JINGLE_ICE_UDP_TRANSPORT);
 	}
 }

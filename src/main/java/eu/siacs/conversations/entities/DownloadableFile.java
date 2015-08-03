@@ -4,7 +4,7 @@ import java.io.File;
 
 import eu.siacs.conversations.utils.MimeUtils;
 
-public class DownloadableFile extends File {
+public class DownloadableFile extends File implements Streamable {
 
 	private static final long serialVersionUID = 2247012619505115863L;
 

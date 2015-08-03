@@ -1,5 +1,6 @@
 package eu.siacs.conversations.xmpp.jingle.stanzas;
 
+import eu.siacs.conversations.utils.Xmlns;
 import eu.siacs.conversations.xml.Element;
 import eu.siacs.conversations.xmpp.jid.Jid;
 import eu.siacs.conversations.xmpp.stanzas.IqPacket;
@@ -53,7 +54,7 @@ public class JinglePacket extends IqPacket {
 	private void build() {
 		this.children.clear();
 		this.jingle.clearChildren();
-		this.jingle.setAttribute("xmlns", "urn:xmpp:jingle:1");
+		this.jingle.setAttribute("xmlns", Xmlns.JINGLE);
 		if (this.content != null) {
 			jingle.addChild(this.content);
 		}

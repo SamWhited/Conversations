@@ -28,7 +28,6 @@ import eu.siacs.conversations.entities.TransferablePlaceholder;
 import eu.siacs.conversations.persistance.FileBackend;
 import eu.siacs.conversations.services.AbstractConnectionManager;
 import eu.siacs.conversations.services.XmppConnectionService;
-import eu.siacs.conversations.utils.Xmlns;
 import eu.siacs.conversations.xml.Element;
 import eu.siacs.conversations.xmpp.OnIqPacketReceived;
 import eu.siacs.conversations.xmpp.jid.Jid;
@@ -91,10 +90,10 @@ public class JingleConnection implements Transferable {
 		}
 	};
 
-	final OnFileTransmissionStatusChanged onFileTransmissionSatusChanged = new OnFileTransmissionStatusChanged() {
+	final OnTransmissionStatusChanged onFileTransmissionSatusChanged = new OnTransmissionStatusChanged() {
 
 		@Override
-		public void onFileTransmitted(DownloadableFile file) {
+		public void onTransmitted(DownloadableFile file) {
 			if (responder.equals(account.getJid())) {
 				sendSuccess();
 				if (acceptedAutomatically) {
@@ -120,17 +119,17 @@ public class JingleConnection implements Transferable {
 		}
 
 		@Override
-		public void onFileTransferAborted() {
+		public void onTransferAborted() {
 			JingleConnection.this.sendCancel();
 			JingleConnection.this.fail();
 		}
 	};
 
-	public InputStream getFileInputStream() {
+	public InputStream getInputStream() {
 		return this.mFileInputStream;
 	}
 
-	public OutputStream getFileOutputStream() {
+	public OutputStream getOutputStream() {
 		return this.mFileOutputStream;
 	}
 

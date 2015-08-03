@@ -13,6 +13,7 @@ import java.util.Arrays;
 import eu.siacs.conversations.Config;
 import eu.siacs.conversations.entities.Account;
 import eu.siacs.conversations.entities.DownloadableFile;
+import eu.siacs.conversations.entities.Streamable;
 import eu.siacs.conversations.persistance.FileBackend;
 import eu.siacs.conversations.utils.CryptoHelper;
 import eu.siacs.conversations.xml.Element;
@@ -41,7 +42,7 @@ public class JingleInbandTransport extends JingleTransport {
 	private long fileSize = 0;
 	private MessageDigest digest;
 
-	private OnFileTransmissionStatusChanged onFileTransmissionStatusChanged;
+	private OnTransmissionStatusChanged onTransmissionStatusChanged;
 
 	private OnIqPacketReceived onAckReceived = new OnIqPacketReceived() {
 		@Override
@@ -84,49 +85,49 @@ public class JingleInbandTransport extends JingleTransport {
 	}
 
 	@Override
-	public void receive(DownloadableFile file,
-			OnFileTransmissionStatusChanged callback) {
-		this.onFileTransmissionStatusChanged = callback;
+	public void receive(final DownloadableFile file, final OnTransmissionStatusChanged callback) {
+
+		this.onTransmissionStatusChanged = callback;
 		this.file = file;
 		try {
 			this.digest = MessageDigest.getInstance("SHA-1");
 			digest.reset();
 			file.getParentFile().mkdirs();
 			file.createNewFile();
-			this.fileOutputStream = connection.getFileOutputStream();
+			this.fileOutputStream = connection.getOutputStream();
 			if (this.fileOutputStream == null) {
 				Log.d(Config.LOGTAG,account.getJid().toBareJid()+": could not create output stream");
-				callback.onFileTransferAborted();
+				callback.onTransferAborted();
 				return;
 			}
 			this.remainingSize = this.fileSize = file.getExpectedSize();
 		} catch (final NoSuchAlgorithmException | IOException e) {
 			Log.d(Config.LOGTAG,account.getJid().toBareJid()+" "+e.getMessage());
-			callback.onFileTransferAborted();
+			callback.onTransferAborted();
 		}
     }
 
 	@Override
-	public void send(DownloadableFile file,
-			OnFileTransmissionStatusChanged callback) {
-		this.onFileTransmissionStatusChanged = callback;
+	public void send(final DownloadableFile file, final OnTransmissionStatusChanged callback) {
+
+		this.onTransmissionStatusChanged = callback;
 		this.file = file;
 		try {
 			this.remainingSize = this.file.getExpectedSize();
 			this.fileSize = this.remainingSize;
 			this.digest = MessageDigest.getInstance("SHA-1");
 			this.digest.reset();
-			fileInputStream = connection.getFileInputStream();
+			fileInputStream = connection.getInputStream();
 			if (fileInputStream == null) {
 				Log.d(Config.LOGTAG,account.getJid().toBareJid()+": could no create input stream");
-				callback.onFileTransferAborted();
+				callback.onTransferAborted();
 				return;
 			}
 			if (this.connected) {
 				this.sendNextBlock();
 			}
 		} catch (NoSuchAlgorithmException e) {
-			callback.onFileTransferAborted();
+			callback.onTransferAborted();
 			Log.d(Config.LOGTAG,account.getJid().toBareJid()+": "+e.getMessage());
 		}
 	}
@@ -156,7 +157,7 @@ public class JingleInbandTransport extends JingleTransport {
 			int count = fileInputStream.read(buffer);
 			if (count == -1) {
 				file.setSha1Sum(CryptoHelper.bytesToHex(digest.digest()));
-				this.onFileTransmissionStatusChanged.onFileTransmitted(file);
+				this.onTransmissionStatusChanged.onTransmitted(file);
 				fileInputStream.close();
 				return;
 			} else if (count != buffer.length) {
@@ -181,13 +182,13 @@ public class JingleInbandTransport extends JingleTransport {
 				connection.updateProgress((int) ((((double) (this.fileSize - this.remainingSize)) / this.fileSize) * 100));
 			} else {
 				file.setSha1Sum(CryptoHelper.bytesToHex(digest.digest()));
-				this.onFileTransmissionStatusChanged.onFileTransmitted(file);
+				this.onTransmissionStatusChanged.onTransmitted(file);
 				fileInputStream.close();
 			}
 		} catch (IOException e) {
 			Log.d(Config.LOGTAG,account.getJid().toBareJid()+": "+e.getMessage());
 			FileBackend.close(fileInputStream);
-			this.onFileTransmissionStatusChanged.onFileTransferAborted();
+			this.onTransmissionStatusChanged.onTransferAborted();
 		}
 	}
 
@@ -204,14 +205,14 @@ public class JingleInbandTransport extends JingleTransport {
 				file.setSha1Sum(CryptoHelper.bytesToHex(digest.digest()));
 				fileOutputStream.flush();
 				fileOutputStream.close();
-				this.onFileTransmissionStatusChanged.onFileTransmitted(file);
+				this.onTransmissionStatusChanged.onTransmitted(file);
 			} else {
 				connection.updateProgress((int) ((((double) (this.fileSize - this.remainingSize)) / this.fileSize) * 100));
 			}
 		} catch (IOException e) {
 			Log.d(Config.LOGTAG,account.getJid().toBareJid()+": "+e.getMessage());
 			FileBackend.close(fileOutputStream);
-			this.onFileTransmissionStatusChanged.onFileTransferAborted();
+			this.onTransmissionStatusChanged.onTransferAborted();
 		}
 	}
 

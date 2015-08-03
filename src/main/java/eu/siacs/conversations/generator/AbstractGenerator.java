@@ -15,11 +15,17 @@ import java.util.TimeZone;
 import eu.siacs.conversations.crypto.axolotl.AxolotlService;
 import eu.siacs.conversations.services.XmppConnectionService;
 import eu.siacs.conversations.utils.PhoneHelper;
+import eu.siacs.conversations.utils.Xmlns;
 
 public abstract class AbstractGenerator {
 	private final String[] FEATURES = {
-			"urn:xmpp:jingle:1",
+			Xmlns.JINGLE,
 			"urn:xmpp:jingle:apps:file-transfer:3",
+			Xmlns.JINGLE_APP_RTP,
+			Xmlns.JINGLE_APP_RTP_AUDIO,
+			Xmlns.JINGLE_APP_RTP_VIDEO,
+			Xmlns.JINGLE_RAW_UDP_TRANSPORT,
+			Xmlns.JINGLE_ICE_UDP_TRANSPORT,
 			"urn:xmpp:jingle:transports:s5b:1",
 			"urn:xmpp:jingle:transports:ibb:1",
 			"http://jabber.org/protocol/muc",
