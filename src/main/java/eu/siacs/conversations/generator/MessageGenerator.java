@@ -69,6 +69,13 @@ public class MessageGenerator extends AbstractGenerator {
 		return packet;
 	}
 
+	public static void addOobDataUrl(final MessagePacket packet,
+			final Message.FileParams params) {
+		final Element x = packet.addChild("x","jabber:x:oob");
+		final Element url = x.addChild("url");
+		url.setBody(params.url.toString())
+	}
+
 	public static void addMessageHints(MessagePacket packet) {
 		packet.addChild("private", "urn:xmpp:carbons:2");
 		packet.addChild("no-copy", "urn:xmpp:hints");
@@ -103,6 +110,9 @@ public class MessageGenerator extends AbstractGenerator {
 		if (message.hasFileOnRemoteHost()) {
 			Message.FileParams fileParams = message.getFileParams();
 			content = fileParams.url.toString();
+			if (fileParams.width > 0 && fileParams.height > 0) {
+				addOobDataUrl(packet,fileParams);
+			}
 		} else {
 			content = message.getBody();
 		}
